@@ -22,24 +22,35 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
 
 
-app.get('/', 
+app.get('/',
 function(req, res) {
   res.render('index');
 });
 
-app.get('/create', 
+app.get('/create',
 function(req, res) {
   res.render('index');
 });
 
-app.get('/links', 
+app.get('/links',
 function(req, res) {
   Links.reset().fetch().then(function(links) {
     res.send(200, links.models);
   });
 });
 
-app.post('/links', 
+app.get('/signup',
+ function(req, res) {
+    res.render('signup');
+});
+
+app.get('/login',
+  function(req, res) {
+    res.render('login');
+ });
+
+
+app.post('/links',
 function(req, res) {
   var uri = req.body.url;
 
@@ -76,6 +87,100 @@ function(req, res) {
 /************************************************************/
 // Write your authentication routes here
 /************************************************************/
+
+app.post('/signup',
+  function(req, res) {
+
+    var username = req.body.username;
+    var password = req.body.password;
+
+    // check if user exists?
+    new User({username:username}).fetch().then(function(found){
+      if(found){
+       //if so, then redirect to signup page (start over)
+       res.redirect('/login');
+      }else{
+       //otherwise, add user and password to database.
+
+       var user = new User({
+      username:username,
+      password:password
+    });
+
+     user.save().then(function(newUser){
+      Users.add(newUser);      
+      //console.log("hey i added, just for our own sake i say this!");
+      res.redirect('/login');
+      res.send(200, newUser);
+     });
+
+    }
+  })
+});
+
+app.post('/login',
+function(req, res) {
+
+  // req has username and passowrd here
+  //console.log(req.body);
+  var username = req.body.username;
+  var password = req.body.password;
+
+  // get username if exists
+
+  new User({username:username}).fetch().then(function(found){
+    if (found){
+      console.log(found);      
+      // verify password...
+      if(password===found.get('password')){
+        res.redirect('/create');
+      }
+      //password is correct:
+        // redirect to links page (user account page if tmeplated)
+      //else password is not correct: redirect to login page.
+  
+    } else {
+       res.redirect('/login');
+       console.log('user not found');        
+    }
+
+  })
+
+  
+
+
+
+  // new Link({ url: uri }).fetch().then(function(found) {
+  //   if (found) {
+  //     res.send(200, found.attributes);
+  //   } else {
+  //     util.getUrlTitle(uri, function(err, title) {
+  //       if (err) {
+  //         console.log('Error reading URL heading: ', err);
+  //         return res.send(404);
+  //       }
+
+  //       var link = new Link({
+  //         url: uri,
+  //         title: title,
+  //         base_url: req.headers.origin
+  //       });
+
+  //       link.save().then(function(newLink) {
+  //         Links.add(newLink);
+  //         res.send(200, newLink);
+  //       });
+  //     });
+  //   }
+  // });
+
+
+  // if it does not exist redirect to the create account page
+
+
+  //res.render('login');
+});
+
 
 
 
