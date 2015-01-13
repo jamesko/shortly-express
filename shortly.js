@@ -107,7 +107,7 @@ app.post('/signup',  function(req, res) {
       //add user to database and redirect to login page:
       user.save().then(function(newUser){
         Users.add(newUser);
-        res.redirect('/login');
+        res.redirect('/');
         res.send(200, newUser);
       });
     }    
@@ -125,7 +125,7 @@ app.post('/login', function(req, res) {
       console.log(found);      
       // verify password...
       if(password===found.get('password')){
-        res.redirect('/create');
+        res.redirect('/');
       }
       //password is correct:
         // redirect to links page (user account page if tmeplated)
