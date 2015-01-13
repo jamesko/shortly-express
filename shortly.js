@@ -21,23 +21,72 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
 
+/************************************************************/
+// session stuff here:
+/************************************************************/
+var cookieParser = require('cookie-parser');
+var session = require('express-session');
+//app.use(bodyParser()); // is this line needed ????
+//app.use(express.cookieParser('what string goes here'));
+app.use(cookieParser('something'))
+//app.use(express.session());
+// app.use(session());
+app.use(session({
+  secret: 'keyboard cat',
+  resave: false,
+  saveUninitialized: true
+}))
 
-app.get('/',
-function(req, res) {
+function restrict(req,res,next){ 
+  if(req.session.user){
+    next();
+  }else{
+    req.session.error = 'Access denied';
+    res.redirect('/login');
+  }
+}
+
+app.get('/', restrict, function(req, res){
+  // res.send('This is the restricted area! Hello ' + 
+  // req.session.user + '! click <a href="/logout">here to logout</a>');
   res.render('index');
 });
 
-app.get('/create',
-function(req, res) {
+app.get('/create', restrict, function(req, res){
+  // res.send('This is the restricted area! Hello ' + 
+  // req.session.user + '! click <a href="/logout">here to logout</a>');
   res.render('index');
 });
 
-app.get('/links',
-function(req, res) {
+app.get('/links', restrict, function(req, res){
+  // res.send('This is the restricted area! Hello ' + 
+  // req.session.user + '! click <a href="/logout">here to logout</a>');
   Links.reset().fetch().then(function(links) {
+    console.log(links);
     res.send(200, links.models);
-  });
+  });  
 });
+
+
+/************************************************************/
+
+
+// app.get('/',
+// function(req, res) {
+//   res.render('index');
+// });
+
+// app.get('/create',
+// function(req, res) {
+//   res.render('index');
+// });
+
+// app.get('/links',
+// function(req, res) {
+//   Links.reset().fetch().then(function(links) {
+//     res.send(200, links.models);
+//   });
+// });
 
 app.get('/signup',
  function(req, res) {
@@ -125,7 +174,10 @@ app.post('/login', function(req, res) {
       console.log(found);      
       // verify password...
       if(password===found.get('password')){
-        res.redirect('/');
+        req.session.regenerate(function(){
+          req.session.user = username;
+          res.redirect('/');
+        });        
       }
       //password is correct:
         // redirect to links page (user account page if tmeplated)
@@ -136,6 +188,14 @@ app.post('/login', function(req, res) {
     }
   })
 });
+
+/************************************************************/
+// session stuff here:
+/************************************************************/
+
+
+
+
 
 
 
