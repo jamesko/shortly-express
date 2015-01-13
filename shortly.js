@@ -88,46 +88,38 @@ function(req, res) {
 // Write your authentication routes here
 /************************************************************/
 
-app.post('/signup',
-  function(req, res) {
-
-    var username = req.body.username;
-    var password = req.body.password;
-
-    // check if user exists?
-    new User({username:username}).fetch().then(function(found){
-      if(found){
-       //if so, then redirect to signup page (start over)
-       res.redirect('/login');
-      }else{
-       //otherwise, add user and password to database.
-
-       var user = new User({
-      username:username,
-      password:password
-    });
-
-     user.save().then(function(newUser){
-      Users.add(newUser);      
-      //console.log("hey i added, just for our own sake i say this!");
+app.post('/signup',  function(req, res) {
+  //extract username and password from request
+  var username = req.body.username;
+  var password = req.body.password;
+  // check if user already exists in database
+  new User({username:username}).fetch().then(function(found){
+    //if the username record is found redirect to login.
+    if(found){        
       res.redirect('/login');
-      res.send(200, newUser);
-     });
-
-    }
+    }else{
+      //otherwise, add user and password to database....
+      //build-up object with properties the user model is designed.
+      var user = new User({
+        username:username,
+        password:password
+      });
+      //add user to database and redirect to login page:
+      user.save().then(function(newUser){
+        Users.add(newUser);
+        res.redirect('/login');
+        res.send(200, newUser);
+      });
+    }    
   })
 });
 
-app.post('/login',
-function(req, res) {
-
-  // req has username and passowrd here
+app.post('/login', function(req, res) {  
+  // req has username and password here
   //console.log(req.body);
   var username = req.body.username;
   var password = req.body.password;
-
   // get username if exists
-
   new User({username:username}).fetch().then(function(found){
     if (found){
       console.log(found);      
@@ -137,48 +129,12 @@ function(req, res) {
       }
       //password is correct:
         // redirect to links page (user account page if tmeplated)
-      //else password is not correct: redirect to login page.
-  
+      //else password is not correct: redirect to login page.  
     } else {
        res.redirect('/login');
        console.log('user not found');        
     }
-
   })
-
-  
-
-
-
-  // new Link({ url: uri }).fetch().then(function(found) {
-  //   if (found) {
-  //     res.send(200, found.attributes);
-  //   } else {
-  //     util.getUrlTitle(uri, function(err, title) {
-  //       if (err) {
-  //         console.log('Error reading URL heading: ', err);
-  //         return res.send(404);
-  //       }
-
-  //       var link = new Link({
-  //         url: uri,
-  //         title: title,
-  //         base_url: req.headers.origin
-  //       });
-
-  //       link.save().then(function(newLink) {
-  //         Links.add(newLink);
-  //         res.send(200, newLink);
-  //       });
-  //     });
-  //   }
-  // });
-
-
-  // if it does not exist redirect to the create account page
-
-
-  //res.render('login');
 });
 
 
