@@ -27,10 +27,7 @@ app.use(express.static(__dirname + '/public'));
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 //app.use(bodyParser()); // is this line needed ????
-//app.use(express.cookieParser('what string goes here'));
-app.use(cookieParser('something'))
-//app.use(express.session());
-// app.use(session());
+app.use(cookieParser('something'));
 app.use(session({
   secret: 'keyboard cat',
   resave: false,
@@ -47,8 +44,8 @@ function restrict(req,res,next){
 }
 
 app.get('/', restrict, function(req, res){
-  // res.send('This is the restricted area! Hello ' + 
-  // req.session.user + '! click <a href="/logout">here to logout</a>');
+   // res.send('This is the restricted area! Hello ' + 
+   // req.session.user + '! click <a href="/logout">here to logout</a>');
   res.render('index');
 });
 
@@ -61,32 +58,15 @@ app.get('/create', restrict, function(req, res){
 app.get('/links', restrict, function(req, res){
   // res.send('This is the restricted area! Hello ' + 
   // req.session.user + '! click <a href="/logout">here to logout</a>');
-  Links.reset().fetch().then(function(links) {
-    console.log(links);
+  Links.reset().fetch().then(function(links) { // from original
+    console.log(links);    
     res.send(200, links.models);
+    // res.redirect('/'); 
   });  
 });
 
 
 /************************************************************/
-
-
-// app.get('/',
-// function(req, res) {
-//   res.render('index');
-// });
-
-// app.get('/create',
-// function(req, res) {
-//   res.render('index');
-// });
-
-// app.get('/links',
-// function(req, res) {
-//   Links.reset().fetch().then(function(links) {
-//     res.send(200, links.models);
-//   });
-// });
 
 app.get('/signup',
  function(req, res) {
@@ -157,7 +137,7 @@ app.post('/signup',  function(req, res) {
       user.save().then(function(newUser){
         Users.add(newUser);
         res.redirect('/');
-        res.send(200, newUser);
+        res.send(200, newUser);                
       });
     }    
   })
@@ -171,7 +151,6 @@ app.post('/login', function(req, res) {
   // get username if exists
   new User({username:username}).fetch().then(function(found){
     if (found){
-      console.log(found);      
       // verify password...
       if(password===found.get('password')){
         req.session.regenerate(function(){
