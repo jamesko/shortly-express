@@ -65,6 +65,15 @@ app.get('/links', restrict, function(req, res){
   });  
 });
 
+// after adding a link to logout on the layout page
+// configure route for logout:
+app.get('/logout', function(req, res){
+  //clean session after logout and send login page
+  req.session.destroy(function(){
+    res.render('login');
+  });
+});
+
 
 /************************************************************/
 
